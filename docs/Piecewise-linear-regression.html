@@ -13080,22 +13080,31 @@ div#notebook {
 <h1 id="Piecewise-linear-regression">Piecewise linear regression<a class="anchor-link" href="#Piecewise-linear-regression">&#182;</a></h1><p>By Sang woo Ham, 09/08/2021</p>
 <h2 id="Table-of-Contents">Table of Contents<a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2><ul>
 <li><a href="#Introduction">Introduction</a></li>
-<li><a href="#Piecewise-linear-model">Piecewise linear model</a></li>
+<li><a href="#Piecewise-linear-regression">Piecewise linear regression</a></li>
 <li><a href="#Parameter-estimation">Parameter estimation</a></li>
 <li><a href="#Discussion">Discussion</a></li>
 <li><a href="#References">References</a></li>
 </ul>
-<h1 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h1><p>This notebook is a simple Python demonstration of <a href="https://online.stat.psu.edu/stat501/lesson/8/8.8">piecewise linear regression</a>. Piecewise linear regression can be used to represent the simplified relationship between outdoor air temperature and whole building energy consumption, and this simple data-driven model of a whole building energy consumption has been widely used for retrofitting application [1,2,3]. We provide a reproducible Python notebook for a piecewise linear regression model. First, we generate a toy dataset from the known piecewise linear regression model. Then, we provide an optimization based approach to estimate model parameters of the piecewise linear regression mode</p>
-<h1 id="Piecewise-linear-model">Piecewise linear model<a class="anchor-link" href="#Piecewise-linear-model">&#182;</a></h1><p>To generate a toy dataset, we assume we know the true model parameters of a piecewise linear model. The true model is a combination of two linear lines intersecting at $x=10$:</p>
+<h1 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h1><p>This notebook is a simple Python demonstration of <a href="https://online.stat.psu.edu/stat501/lesson/8/8.8">piecewise linear regression</a>. Piecewise linear regression can be used to represent the relationship between outdoor air temperature and whole building energy consumption. This can be viewed as a simple data-driven model of a whole building energy consumption, and it has been widely used for retrofitting application [1,2,3].</p>
+<p>In this document, We provide a reproducible Python notebook how to make a piecewise linear regression model so that one can apply the model to the building energy consumption data. First, we generate a toy dataset from the known piecewise linear regression model. Then, we provide an optimization based approach to estimate model parameters of the piecewise linear regression model.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Piecewise-linear-regression">Piecewise linear regression<a class="anchor-link" href="#Piecewise-linear-regression">&#182;</a></h1><p><a href="https://online.stat.psu.edu/stat501/lesson/8/8.8">Piecewise linear regression</a> is a model that is composed of several linear regressions for different intervals of indepedent variables. This is useful when the behavior of depedent variable radically change in different intervals of indepdent variables (e.g., heating and cooling energy consumption with respect to outdoor air temperature).</p>
+<p>To generate the toy dataset, we assume we know the true model parameters of a piecewise linear model. The true model is a combination of two linear lines intersecting at $x=10$:</p>
 $$
 \begin{align}
 y &amp;= -x+5 &amp;\text{ if } &amp;x&lt;10 \\
 y &amp;= -x+5+3(x-10) &amp;\text{ if } &amp;x\geq10.
 \end{align}
-$$<p>This can be a written in this format:</p>
+$$<p>This can be written in this format as shown in those references [1,2,3]:</p>
 $$y=5-x+3(x-10)^{+},$$<p>where $()^{+}$ is $0$ when the value in $()$ is less than $0$. Likewise, $()^{-}$ is $0$ when the value in $()$ is greater than $0$.</p>
 <p>In real world, we don't have 100% accurate measurement. For the simplicity, all sources of uncertainties (e.g., measurement errors, noise in data generation process, etc.) are modeled as a single noise $\varepsilon$. We assume this noise follows a normal distribution of $\varepsilon \sim \text{N}(\mu_{\varepsilon}=0,\sigma_{\varepsilon}=2)$.</p>
-<p>With data specific index $i$:</p>
+<p>With data specific index $i=1,2,...n$:</p>
 $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows how to generate the data.</p>
 
 </div>
@@ -13103,14 +13112,12 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># loading required packages.</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="c1"># numpy for numerical calculation </span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span> <span class="c1"># visualization</span>
-
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 
@@ -13121,7 +13128,7 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># fix seed to have consistent random number generation to make this example reproducible. </span>
@@ -13152,7 +13159,7 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -13173,13 +13180,13 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[59]:</div>
+    <div class="prompt output_prompt">Out[5]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.legend.Legend at 0x176981b9d88&gt;</pre>
+<pre>&lt;matplotlib.legend.Legend at 0x28036490ac8&gt;</pre>
 </div>
 
 </div>
@@ -13206,17 +13213,85 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Parameter-estimation">Parameter estimation<a class="anchor-link" href="#Parameter-estimation">&#182;</a></h1><p>d</p>
+<h1 id="Parameter-estimation">Parameter estimation<a class="anchor-link" href="#Parameter-estimation">&#182;</a></h1><p>Now, let's have a different view. We have data set (i.e., <code>x_data</code> and <code>y_data</code> in the above code, which are $\{x_i, y_i\}$ for $i=1,2,...n$). We want to find a piecewise linear regression model that explains the data.</p>
+<p>Let's parameterizes a piecewise linear regression in the following format:</p>
+$$y_{i}=\beta_0+\beta_{1}x_{i}+\beta_{2}(x_{i}-\beta_{3})^{+}+\varepsilon_{i},$$<p>where $\varepsilon_{i}\sim \text{N}(0,\sigma_{\varepsilon})$, and the unknown parameters are $\beta0$, $\beta1$, $\beta2$, $\beta3$, and $\sigma_{\varepsilon}$.</p>
+<p>There are two types of methods to estimate the parameters: (1) <a href="https://en.wikipedia.org/wiki/Least_squares">least-squares method</a> and (2) <a href="https://en.wikipedia.org/wiki/Maximum_likelihood_estimation">maximum likelihood estimation (MLE)</a>. MLE method requires the understanding of probabilistic modeling, and both methods give same results for linear regression models with gaussian noise (i.e., $\varepsilon_{i}\sim \text{N}(0,\sigma_{\varepsilon})$). Therefore, we use least-square method in this notebook to estimate parameters. In this case, we don't need to explicitly estimate $\sigma_{\varepsilon}.$</p>
+<p>Least-squares method is to find parameters that minimizes the sum of squares of prediction errors. When collecting all the parameters as $\theta=\{\beta_0, \beta_1, \beta_2, \text{ and } \beta_3 \}$, the least-squares soltuion of $\theta^{*}$ is estimated by solving:</p>
+$$\theta^{*}=\underset{\theta}{\arg\min} \sum_{i=1}^n \left(y_i-\hat{y}_i \right)^2,$$<p>where $\hat{y}_{i}=\beta_0+\beta_{1}x_{i}+\beta_{2}(x_{i}-\beta_{3})^{+}$.</p>
+<p>This problem can be solved by using least-squares method for typical types of curves (linear or non-linear) implemented in <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html">scipy package</a>. In addition, <a href="https://numpy.org/doc/stable/reference/generated/numpy.piecewise.html">numpy package</a> provides a function to model the piecewise defined function. Please refer the comments in below code snippet.</p>
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># refer these sites</span>
+<span class="c1"># https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html</span>
+<span class="c1"># https://numpy.org/doc/stable/reference/generated/numpy.piecewise.html</span>
+
+<span class="c1"># loading package</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span>
+
+<span class="k">def</span> <span class="nf">piecewise_linear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta0</span><span class="p">,</span> <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span><span class="p">,</span> <span class="n">beta3</span><span class="p">):</span>
+    <span class="n">condlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">beta3</span><span class="p">,</span>  <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">beta3</span><span class="p">]</span> <span class="c1"># x&lt;beta3 applies to lambda x: beta0+beta1*x. </span>
+    <span class="n">funclist</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">beta0</span><span class="o">+</span><span class="n">beta1</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">beta0</span><span class="o">+</span><span class="n">beta1</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">beta2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">beta3</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">condlist</span><span class="p">,</span> <span class="n">funclist</span><span class="p">)</span> 
+
+<span class="c1"># estimate theta* and covariance of theta*</span>
+<span class="n">theta</span> <span class="p">,</span> <span class="n">theta_cov</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span><span class="n">piecewise_linear</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">)</span> <span class="c1">#least square</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># beta0, beta1, beta2, beta3</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Print results&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The estimated       beta0*:{round(theta[0],2)}, beta1*: {round(theta[1],2)}, beta2*: {round(theta[2],2)}, and  beta3*: {round(theta[3],2)}.&#39;</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The true parameters beta0: 5.00, beta1: -1.00,  beta2: 3.00, and  beta3: 10.00&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Print results
+The estimated       beta0*:5.57, beta1*: -1.11, beta2*: 3.2, and  beta3*: 10.12.
+The true parameters beta0: 5.00, beta1: -1.00,  beta2: 3.00, and  beta3: 10.00
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#  least-squares method finds the optimal parameter values by minimizing the sum of squared residuals, {\displaystyle S}S:[10]</span>
+<div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 
     </div>
@@ -13226,109 +13301,14 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span>
-
-<span class="k">def</span> <span class="nf">piecewise_linear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
-    <span class="n">condlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">x0</span><span class="p">,</span>  <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x0</span><span class="p">]</span>
-    <span class="n">funclist</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">b0</span><span class="o">+</span><span class="n">b1</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">b0</span><span class="o">+</span><span class="n">b1</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">b2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">x0</span><span class="p">)]</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">condlist</span><span class="p">,</span> <span class="n">funclist</span><span class="p">)</span>
-
-<span class="n">p</span> <span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span><span class="n">piecewise_linear</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">)</span> <span class="c1">#least square</span>
-<span class="c1"># https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html</span>
-
-
-<span class="c1">#xd = np.linspace(-30, 30, 1000)</span>
-<span class="c1">#plt.plot(x, y, &quot;o&quot;)</span>
-<span class="c1">#plt.plot(xd, piecewise_linear(xd, *p))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">p</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[29]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>array([10.11835902,  5.56719523, -1.11220801,  3.2019081 ])</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">e</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[30]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>array([[ 0.06116177,  0.00705386,  0.01318714, -0.00880024],
-       [ 0.00705386,  0.12322733, -0.00994643,  0.00994643],
-       [ 0.01318714, -0.00994643,  0.00515602, -0.00515602],
-       [-0.00880024,  0.00994643, -0.00515602,  0.00675202]])</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="s2">&quot;bx&quot;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">piecewise_linear</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">),</span><span class="s1">&#39;g-&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;estimated&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">piecewise_linear</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="o">*</span><span class="n">theta</span><span class="p">),</span><span class="s1">&#39;g-&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;estimated&#39;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span><span class="n">y_grid</span><span class="p">,</span><span class="s1">&#39;r-&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;true&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=.</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13341,13 +13321,13 @@ $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows ho
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[39]:</div>
+    <div class="prompt output_prompt">Out[26]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.legend.Legend at 0x17696a33d48&gt;</pre>
+<pre>&lt;matplotlib.legend.Legend at 0x280373fcac8&gt;</pre>
 </div>
 
 </div>
