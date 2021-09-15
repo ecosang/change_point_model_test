@@ -13103,7 +13103,7 @@ y &amp;= -x+5+3(x-10) &amp;\text{ if } &amp;x\geq10.
 \end{align}
 $$<p>This can be written in this format as shown in those references [1,2,3]:</p>
 $$y=5-x+3(x-10)^{+},$$<p>where $()^{+}$ is $0$ when the value in $()$ is less than $0$. Likewise, $()^{-}$ is $0$ when the value in $()$ is greater than $0$.</p>
-<p>In real world, we don't have 100% accurate measurement. For the simplicity, all sources of uncertainties (e.g., measurement errors, noise in data generation process, etc.) are modeled as a single noise $\varepsilon$. We assume this noise follows a normal distribution of $\varepsilon \sim \text{N}(\mu_{\varepsilon}=0,\sigma_{\varepsilon}=2)$.</p>
+<p>In real world, we don't have 100% accurate measurement. For the simplicity, all sources of uncertainties (e.g., measurement errors, noise in data generation process, etc.) are modeled as a single noise $\varepsilon$. We assume this noise follows a normal distribution of $\varepsilon_i \sim \text{N}(\mu_{\varepsilon}=0,\sigma_{\varepsilon}=2)$.</p>
 <p>With data specific index $i=1,2,...n$:</p>
 $$y_{i}=5-x_{i}+3(x_{i}-10)^{+}+\varepsilon_{i}.$$<p>Below code snippet shows how to generate the data.</p>
 
@@ -13315,7 +13315,6 @@ The true parameters beta0: 5.00, beta1 : -1.00, beta2 : 3.00, and  beta3 : 10.00
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$x$&quot;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$y$&quot;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13376,6 +13375,19 @@ The true parameters beta0: 5.00, beta1 : -1.00, beta2 : 3.00, and  beta3 : 10.00
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div>
     </div>
   </div>
